@@ -17,26 +17,32 @@ class Translation
         }
     }
 
-    public function select($record = array())
+    public function select($select = '*', $where = array())
     {
-        $from = array();
-        $where = array();
+        $whereList = array();
 
-        foreach ($record as $key => $value) {
-            $from[] = $key;
-            $where[] = $key . '=' . $this->dbh->quote($value);
+        if (! is_array($select)) {
+            $select = array($select);
         }
 
-        $from = (count($from) > 0) ? implode(',', $from) : '*';
+        $sql = "SELECT ".implode(',', $select)." FROM " . $this->tableTarget;
 
-        $sql = "SELECT ".$from." FROM " . $this->tableTarget;
+        if (! empty($where)) {
+            foreach ($where as $key => $value) {
+                $whereList[] = $key . '=' . $this->dbh->quote($value);
+            }
 
-        if (! empty($record)) {
-            $sql .= " WHERE ".implode(',', $where);
+            $sql .= " WHERE ".implode(',', $whereList);
         }
 
         try {
-            $rows = $this->dbh->query($sql)->fetchall();
+
+            $rows = $this->dbh->query($sql);
+
+            if (! $rows) {
+                return false;
+            }
+
             $records = array();
             foreach ($rows as $row) {
                 $record = array();
@@ -85,13 +91,10 @@ class Translation
             $where[] = $key . '=' . $this->dbh->quote($value);
         }
 
-        $sql = "UPDATE ".$this->tableTarget." SET ".implode(',', $keys)." WHERE ".implode(',', $where).";";
+        $sql = "UPDATE ".$this->tableTarget." SET ".implode(',', $set)." WHERE ".implode(' AND ', $where).";";
 
-        try {
-            $this->dbh->exec($sql);
-        } catch (PDOException $e) {
-            echo 'Query Error: ' . $e->getMessage();
-        }
+        //error_log($sql);
+        $this->dbh->exec($sql);
     }
 
     public function query($sql)
@@ -112,7 +115,7 @@ class Translation
 
     public function createProject($projName)
     {
-        $projName = strtoupper($projName);
+        //$projName = strtoupper($projName);
         $sql = <<<EOL
 CREATE TABLE IF NOT EXISTS `$projName` (
   `ID` int(11) NOT NULL AUTO_INCREMENT,
@@ -132,6 +135,12 @@ EOL;
             'PROJECT_NAME' => $projName,
             'CREATE_DATE' => date('Y-m-d H:i:s')
         ));
-        return $this->dbh->exec($sql);
+        $this->dbh->exec($sql);
+
+        $this->dbh->exec("CREATE INDEX ID_index USING BTREE ON lookup (ID);");
+        $this->dbh->exec("CREATE INDEX REF_1_index USING BTREE ON lookup (REF_1);");
+        $this->dbh->exec("CREATE INDEX REF_2_index USING BTREE ON lookup (REF_2);");
+        $this->dbh->exec("CREATE INDEX REF_LOC_index USING BTREE ON lookup (REF_LOC);");
+        $this->dbh->exec("CREATE INDEX MSG_ID_index USING BTREE ON lookup (MSG_ID);");
     }
 }

@@ -2,6 +2,8 @@
 error_reporting(E_ALL);
 $config = parse_ini_file('config.ini');
 
+$config['base_url'] = rtrim($config['base_url'], '/') . '/'; // to ensure that always have a slash at string ending
+
 //print_r($config);
 
 //echo '<pre>';print_r($_SERVER); die;
@@ -19,6 +21,7 @@ $action = empty($url[1]) ? 'index': $url[1];
 $controllerFile = 'src'.DIRECTORY_SEPARATOR.ucfirst($controller) . ".php";
 
 //var_dump($controller, $action); die;
+
 try {
     if (! file_exists($controllerFile)) {
         throw new Exception("Controller '$controller' does not exist");
@@ -31,6 +34,7 @@ try {
     }
 
     $c = new $controller();
+    $c->config = $config;
 
     if (! method_exists($c, $action)) {
         throw new Exception("Action '$controller/$action' does not exist");

@@ -6,6 +6,8 @@
     <link rel="stylesheet" type="text/css" title="gray" href="public/extjs/resources/css/xtheme-gray.css" />
     <link rel="stylesheet" type="text/css" title="gray" href="public/ext-gray-extend.css" />
     <link rel="stylesheet" type="text/css" title="gray" href="public/rowEditor.css" />
+    <link rel="stylesheet" type="text/css" title="gray" href="public/statusbar.css" />
+
 
     <style type="text/css">
 
@@ -19,12 +21,13 @@
     <script type="text/javascript" src="public/extjs/ext-all.js"></script>
     <script type="text/javascript" src="public/ux-all.js"></script>
 
-    <script type="text/javascript" src="js/main.js"></script>
-
     <script>
         var projects = <?php echo json_encode($projects)?>;
-        var defaultProject = '<?php echo $defaultProject ?>';
+        var project = <?php echo json_encode($project)?>;
+        var base_url = '<?php echo $config['base_url']?>'
     </script>
+
+    <script type="text/javascript" src="js/main.js"></script>
 </head>
 <body>
 
