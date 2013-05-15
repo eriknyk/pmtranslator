@@ -24,7 +24,7 @@ class Main
         }
 
         if (empty($project)) {
-            $project = count($rows) > 0 ? $rows[0] : array();
+            $project = count($projectsList) > 0 ? $projectsList[0] : array();
         }
 
         $config = $this->config;
@@ -205,13 +205,20 @@ class Main
 
             if ($type == 'source') {
                 $translation->setTarget('PROJECT');
+                $record = array(
+                    'COUNTRY' => ($poHeaders['X-Poedit-Country'] != '.' ? $poHeaders['X-Poedit-Country'] : ''),
+                    'LANGUAGE' => $poHeaders['X-Poedit-Language'],
+                    'NUM_RECORDS' => $countItems,
+                    'LOCALE' => $locale
+                );
+
+                if (array_key_exists('Country', $_REQUEST)) {
+                    $record['TARGET_COUNTRY'] = $_REQUEST['Country'];
+                    $record['TARGET_LANGUAGE'] = $_REQUEST['Language'];
+                    $record['TARGET_LOCALE'] = self::resolveLocale($_REQUEST['Country'], $_REQUEST['Language']);
+                }
                 $translation->update(
-                    array(
-                        'COUNTRY' => ($poHeaders['X-Poedit-Country'] != '.' ? $poHeaders['X-Poedit-Country'] : ''),
-                        'LANGUAGE' => $poHeaders['X-Poedit-Language'],
-                        'NUM_RECORDS' => $countItems,
-                        'LOCALE' => $locale
-                    ),
+                    $record,
                     array('PROJECT_NAME' => $_REQUEST['project'])
                 );
             }
@@ -288,8 +295,8 @@ class Main
             $poFile->addTranslatorComment( $row['REF_2'] );
             $poFile->addReference( $row['REF_LOC'] );
 
-            //$poFile->addTranslation( stripcslashes( $msgid ), stripcslashes( $msgstr ) );
-            $poFile->addTranslation( $row['MSG_ID'], $row['TRANSLATED_MSG_STR'] );
+            $poFile->addTranslation( stripcslashes( $row['MSG_ID'] ), stripcslashes( $row['TRANSLATED_MSG_STR'] ) );
+            //$poFile->addTranslation( $row['MSG_ID'], $row['TRANSLATED_MSG_STR'] );
         }
 
         header( 'Content-Disposition: attachment; filename="' . basename($filename) . '"' );

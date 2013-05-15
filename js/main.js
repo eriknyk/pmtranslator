@@ -15,7 +15,7 @@ var uploadType;
 function main()
 {
     Ext.QuickTips.init();
-    Ext.state.Manager.setProvider(new Ext.state.CookieProvider());
+    //Ext.state.Manager.setProvider(new Ext.state.CookieProvider());
 
     /*store = new Ext.data.GroupingStore( {
         autoLoad: true,
@@ -148,174 +148,6 @@ function main()
     //////////
 
 
-    //
-    // toolbar options
-    //
-
-    var newAction = new Ext.Action({
-        text: 'New Project',
-        //iconCls: 'silk-add',
-        icon: 'public/images/circle_plus.png',
-        handler: function(){
-          var win = new Ext.Window({
-            id: 'win',
-            title: '',
-            width: 420,
-            height: 170,
-            modal: true,
-            autoScroll: false,
-            maximizable: false,
-            resizable: false,
-            //closeAction : 'hide',
-            items: [
-              new Ext.FormPanel({
-                id:'uploader',
-                fileUpload: true,
-                width: 400,
-                frame: true,
-                title: 'Upload File',
-                autoHeight: false,
-                bodyStyle: 'padding: 10px 10px 0 10px;',
-                labelAlign: 'right',
-                labelWidth: 100,
-                defaults: {
-                    anchor: '90%',
-                    allowBlank: false,
-                    msgTarget: 'side'
-                },
-                items: [
-                    {
-                        id: 'project',
-                        name: 'project',
-                        xtype: 'textfield',
-                        fieldLabel: 'Project Name',
-                        allowBlank: false
-                    },
-                    {
-                        xtype: 'fileuploadfield',
-                        id: 'form-file',
-                        emptyText: 'Select a .po file',
-                        fieldLabel: 'File',
-                        name: 'po_file',
-                        buttonText: '',
-                        buttonCfg: {
-                            icon: 'public/images/folder_open.png',
-                        }
-                    }
-                ],
-                buttons: [
-                    {
-                        text: 'Upload',
-                        handler: function() {
-                            var uploader = Ext.getCmp('uploader');
-
-                            if (uploader.getForm().isValid()) {
-                                uploader.getForm().submit({
-                                    url: 'main/upload?type=source&project='+defaultProject,
-                                    waitTitle:'',
-                                    waitMsg: 'Uploading...',
-                                    success: function(o, resp){
-                                        var projectName = Ext.getCmp('project').getValue();
-                                        location.href = base_url + '?project=' + projectName;
-                                    },
-                                    failure: function(o, resp){
-                                        win.close();
-                                        Ext.MessageBox.show({title: '', msg: resp.result.msg, buttons:Ext.MessageBox.OK, animEl: 'mb9', fn: function(){}, icon:Ext.MessageBox.ERROR});
-                                    }
-                                });
-                            }
-                        }
-                    },
-                    {
-                        text: 'Cancel',
-                        handler: function(){
-                            win.close();
-                        }
-                    }
-                ]
-              })
-            ]
-          });
-          win.show();
-        }
-    });
-
-    w = new Ext.Window({
-        id: 'uploadWindow2',
-        title: '',
-        width: 420,
-        height: 140,
-        modal: true,
-        autoScroll: false,
-        maximizable: false,
-        resizable: false,
-        closeAction : 'hide',
-        items: [
-          new Ext.FormPanel({
-            id:'uploader2',
-            fileUpload: true,
-            width: 400,
-            frame: true,
-            title: 'Upload File',
-            autoHeight: false,
-            bodyStyle: 'padding: 10px 10px 0 10px;',
-            labelWidth: 50,
-            defaults: {
-                anchor: '90%',
-                allowBlank: false,
-                msgTarget: 'side'
-            },
-            items: [{
-                xtype: 'fileuploadfield',
-                id: 'form-file2',
-                emptyText: 'Select a .po file',
-                fieldLabel: 'File',
-                name: 'po_file',
-                buttonText: '',
-                buttonCfg: {
-                    icon: 'public/images/folder_open.png',
-                }
-            }],
-            buttons: [{
-                    text: 'Upload',
-                    handler: function() {
-                        var uploader = Ext.getCmp('uploader2');
-
-                        if (uploader.getForm().isValid()) {
-                            uploader.getForm().submit({
-                                url: 'main/upload?type='+uploadType+'&project='+defaultProject,
-                                waitTitle:'',
-                                waitMsg: 'Uploading...',
-                                success: function(o, resp){
-                                    w.close();
-                                    grid.store.reload();
-
-                                    Ext.MessageBox.show({
-                                        width: 500,
-                                        height: 500,
-                                        msg: "<pre style='font-size:10px'>"+resp.result.message+"</pre>",
-                                        buttons: Ext.MessageBox.OK,
-                                        icon: Ext.MessageBox.INFO
-                                    });
-                                },
-                                failure: function(o, resp){
-                                    w.close();
-                                    Ext.MessageBox.show({title: '', msg: resp.result.msg, buttons: Ext.MessageBox.OK, animEl: 'mb9', fn: function(){}, icon: Ext.MessageBox.ERROR});
-                                }
-                            });
-                        }
-                    }
-                }, {
-                    text: 'Cancel',
-                    handler: function(){
-                        w.hide();
-                    }
-                }
-            ]
-          })
-        ]
-    });
-
     var comboLanguage = new Ext.form.ComboBox({
         id: 'Language',
         fieldLabel: 'Language',
@@ -396,6 +228,194 @@ function main()
         }
     });
 
+    //
+    // toolbar options
+    //
+
+
+    var newProjectWindow = new Ext.Window({
+        id: 'newProjectWindow',
+        title: '&nbsp;',
+        width: 420,
+        height: 276,
+        modal: true,
+        autoScroll: true,
+        maximizable: false,
+        resizable: false,
+        closeAction : 'hide',
+        items: [
+          new Ext.FormPanel({
+            id:'uploader',
+            fileUpload: true,
+            width: 400,
+            //height: 250,
+            frame: true,
+            //title: 'Upload File',
+            //autoHeight: false,
+            //bodyStyle: 'padding: 10px 10px 0 10px;',
+            labelAlign: 'right',
+            labelWidth: 100,
+            items: [
+                new Ext.form.FieldSet({
+                    title: 'Project Details',
+                    defaults: {
+                        anchor: '90%',
+                        allowBlank: false,
+                        msgTarget: 'side'
+                    },
+                    items: [
+                        {
+                            id: 'project',
+                            name: 'project',
+                            xtype: 'textfield',
+                            fieldLabel: 'Project Name',
+                            allowBlank: false
+                        },
+                        {
+                            xtype: 'fileuploadfield',
+                            id: 'form-file',
+                            emptyText: 'Select a .po file',
+                            fieldLabel: 'File',
+                            name: 'po_file',
+                            buttonText: '',
+                            buttonCfg: {
+                                icon: 'public/images/folder_open.png',
+                            }
+                        }
+                    ]
+                }),
+                new Ext.form.FieldSet({
+                    id: '&nbsp;',
+                    title: 'Project Translation Details',
+                    defaults: {
+                        anchor: '90%',
+                        allowBlank: false,
+                        msgTarget: 'side'
+                    },
+                    items: [
+                        comboCountry,
+                        comboLanguage
+                    ]
+                })
+            ],
+            buttons: [
+                {
+                    text: 'Upload',
+                    handler: function() {
+                        var uploader = Ext.getCmp('uploader');
+
+                        if (uploader.getForm().isValid()) {
+                            uploader.getForm().submit({
+                                url: 'main/upload?type=source&project='+defaultProject,
+                                waitTitle:'',
+                                waitMsg: 'Uploading...',
+                                success: function(o, resp){
+                                    var projectName = Ext.getCmp('project').getValue();
+                                    location.href = base_url + '?project=' + projectName;
+                                },
+                                failure: function(o, resp){
+                                    newProjectWindow.close();
+                                    Ext.MessageBox.show({title: '', msg: resp.result.msg, buttons:Ext.MessageBox.OK, animEl: 'mb9', fn: function(){}, icon:Ext.MessageBox.ERROR});
+                                }
+                            });
+                        }
+                    }
+                },
+                {
+                    text: 'Cancel',
+                    handler: function(){
+                        newProjectWindow.close();
+                    }
+                }
+            ]
+          })
+        ]
+    });
+
+    var newAction = new Ext.Action({
+        text: 'New Project',
+        icon: 'public/images/circle_plus.png',
+        handler: function(){
+            newProjectWindow.show();
+        }
+    });
+
+    w = new Ext.Window({
+        id: 'uploadWindow2',
+        title: '',
+        width: 420,
+        height: 140,
+        modal: true,
+        autoScroll: false,
+        maximizable: false,
+        resizable: false,
+        closeAction : 'hide',
+        items: [
+          new Ext.FormPanel({
+            id:'uploader2',
+            fileUpload: true,
+            width: 400,
+            frame: true,
+            title: 'Upload File',
+            autoHeight: false,
+            bodyStyle: 'padding: 10px 10px 0 10px;',
+            labelWidth: 50,
+            defaults: {
+                anchor: '90%',
+                allowBlank: false,
+                msgTarget: 'side'
+            },
+            items: [{
+                xtype: 'fileuploadfield',
+                id: 'form-file2',
+                emptyText: 'Select a .po file',
+                fieldLabel: 'File',
+                name: 'po_file',
+                buttonText: '',
+                buttonCfg: {
+                    icon: 'public/images/folder_open.png',
+                }
+            }],
+            buttons: [{
+                    text: 'Upload',
+                    handler: function() {
+                        var uploader = Ext.getCmp('uploader2');
+
+                        if (uploader.getForm().isValid()) {
+                            uploader.getForm().submit({
+                                url: 'main/upload?type='+uploadType+'&project='+defaultProject,
+                                waitTitle:'',
+                                waitMsg: 'Uploading...',
+                                success: function(o, resp){
+                                    w.close();
+                                    grid.store.reload();
+
+                                    Ext.MessageBox.show({
+                                        width: 500,
+                                        height: 500,
+                                        msg: "<pre style='font-size:10px'>"+resp.result.message+"</pre>",
+                                        buttons: Ext.MessageBox.OK,
+                                        icon: Ext.MessageBox.INFO
+                                    });
+                                },
+                                failure: function(o, resp){
+                                    w.close();
+                                    Ext.MessageBox.show({title: '', msg: resp.result.msg, buttons: Ext.MessageBox.OK, animEl: 'mb9', fn: function(){}, icon: Ext.MessageBox.ERROR});
+                                }
+                            });
+                        }
+                    }
+                }, {
+                    text: 'Cancel',
+                    handler: function(){
+                        w.hide();
+                    }
+                }
+            ]
+          })
+        ]
+    });
+
     var exportWindow = new Ext.Window({
         id: 'exportWindow',
         title: '',
@@ -421,11 +441,11 @@ function main()
                 anchor: '90%',
                 allowBlank: false,
                 msgTarget: 'side'
-            },
+            }/*,
             items: [
                 comboCountry,
                 comboLanguage
-            ],
+            ]*/,
             buttons: [{
                     text: 'Export',
                     handler: function() {
@@ -475,7 +495,9 @@ function main()
         iconCls: 'silk-add',
         icon: 'public/images/upload.png',
         handler: function(){
-            exportWindow.show();
+            //exportWindow.show();
+            var url = 'main/export?project='+defaultProject+'&country='+Ext.getCmp('Country').getValue()+'&language='+Ext.getCmp('Language').getValue();
+            location.href = url;
         }
     });
 
@@ -501,7 +523,7 @@ function main()
         },
         {
             id: 'MSG_STR',
-            header: 'Source String',
+            header: 'Source String ('+project.LANGUAGE+')',
             dataIndex: 'MSG_STR',
             width: screenWidth/2,
             sortable: true,
@@ -510,7 +532,7 @@ function main()
             }
         },{
             id: 'TRANSLATED_MSG_STR',
-            header: 'Source String',
+            header: 'Translated String ('+project.TARGET_LANGUAGE+')',
             dataIndex: 'TRANSLATED_MSG_STR',
             width : screenWidth/2,
             sortable: true,
@@ -542,6 +564,46 @@ function main()
             }
         }
     });
+
+    Ext.ns('App');
+
+    App.BookDetail = Ext.extend(Ext.Panel, {
+        // add tplMarkup as a new property
+        tplMarkup: [
+            '<table class="datails">',
+            '<tr><td class="label">Project:</td><td>{PROJECT_NAME}</td>',
+            '<td class="label">Source Country:</td><td> {COUNTRY}</td>',
+            '<td class="label">Target Country:</td><td> {TARGET_COUNTRY}</td></tr>',
+            '<tr><td class="label">Created Since:</td><td>{CREATE_DATE}</td>',
+            '<td class="label">Source Language:</td><td> {LANGUAGE}</td>',
+            '<td class="label">Target Language:</td><td> {TARGET_LANGUAGE}</td></tr>',
+            '<tr><td class="label">Last Update:</td><td>{UPDATE_DATE}</td></tr>',
+            '<tr><td class="label">Records Count:</td><td> {NUM_RECORDS}</td></tr></table>'
+        ],
+        // startingMarup as a new property
+        startingMarkup: 'Please select a book to see additional details',
+        // override initComponent to create and compile the template
+        // apply styles to the body of the panel and initialize
+        // html to startingMarkup
+        initComponent: function() {
+            this.tpl = new Ext.Template(this.tplMarkup);
+            Ext.apply(this, {
+                bodyStyle: {
+                    background: '#ffffff',
+                    padding: '7px'
+                },
+                html: this.startingMarkup
+            });
+            // call the superclass's initComponent implementation
+            App.BookDetail.superclass.initComponent.call(this);
+        },
+        // add a method which updates the details
+        updateDetail: function(data) {
+            this.tpl.overwrite(this.body, data);
+        }
+    });
+    // register the App.BookDetail class with an xtype of bookdetail
+    Ext.reg('bookdetail', App.BookDetail);
 
     var projectDetailsForm = new Ext.FormPanel({
         //title: '&nbsp;',
@@ -630,11 +692,12 @@ function main()
             },
             {
                 //layout: 'fit',
-                xtype: 'panel',
+                xtype: 'bookdetail',
+                id: 'detailPanel',
                 region: 'north',
                 height: northPanelHeight,
                 title: "Translator Tool",
-                items: northPanelItems,
+                //items: northPanelItems,
                 tbar: [
                     '&nbsp;&nbsp;Project: ',
                     projectsCombo,
@@ -644,6 +707,10 @@ function main()
             }
         ]
     });
+
+
+    var detailPanel = Ext.getCmp('detailPanel');
+    detailPanel.updateDetail(project);
 }
 
 

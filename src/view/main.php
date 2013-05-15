@@ -10,7 +10,22 @@
 
 
     <style type="text/css">
+    table.datails {
+        font-family: Helvetica, Arial;
+        border: 0;
+    }
 
+    table.datails td{
+        font-family: Helvetica, Arial;
+        font-size: 12px;
+    }
+
+    .label{
+        width:150px;
+        align:right;
+        font-weight: bold;
+        text-align: right;
+    }
     </style>
 
     <!-- ** Javascript ** -->
