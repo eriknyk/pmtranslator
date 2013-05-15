@@ -159,6 +159,7 @@ class Main
 
             ////
             $countItems = 0;
+            $updatedItems = 0;
             $countItemsSuccess = 0;
             $errorMsg = '';
 
@@ -171,8 +172,6 @@ class Main
 
 
             while ($rowTranslation = $poHandler->getTranslation()) {
-                $countItems ++;
-
                 if (! isset( $poHandler->translatorComments[0] ) || ! isset( $poHandler->translatorComments[1] ) || ! isset( $poHandler->references[0] )) {
                     throw new Exception( 'The .po file doesn\'t have valid directives for Processmaker!' );
                 }
@@ -189,8 +188,26 @@ class Main
                     );
 
                     // verify if record already exists
+                    $where = array(
+                        'REF_1' => $poHandler->translatorComments[0],
+                        'REF_2' => $poHandler->translatorComments[1],
+                        'REF_LOC' => $poHandler->references[0],
+                    );
 
-                    $translation->save($record);
+                    $matchRecord = $translation->select('*', $where);
+
+                    if (! empty($matchRecord)) {
+                        $matchRecord = $matchRecord[0];
+                        if ($matchRecord['MSG_ID'] !== $rowTranslation['msgid']) {
+                            $updatedItems++;
+                            $translation->update(array('MSG_STR' => $rowTranslation['msgid']), $where);
+                        }
+
+                    } else {
+                        $countItems++;
+                        $translation->save($record);
+                    }
+
                 } elseif ($type == 'target') {
                     $record = array(
                         'REF_1' => $poHandler->translatorComments[0],
@@ -225,7 +242,8 @@ class Main
 
             $results->success = true;
             $results->recordsCount = $countItems;
-            $results->message = "Imported ($countItems) labels.";
+            $results->message = "New Records: $countItems\n";
+            $results->message .= "Updated Records: $updatedItems";
         } catch (Exception $e) {
             $results->success = false;
             $results->message = $e->getMessage();

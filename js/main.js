@@ -314,7 +314,7 @@ function main()
                                     location.href = base_url + '?project=' + projectName;
                                 },
                                 failure: function(o, resp){
-                                    newProjectWindow.close();
+                                    newProjectWindow.hide();
                                     Ext.MessageBox.show({title: '', msg: resp.result.msg, buttons:Ext.MessageBox.OK, animEl: 'mb9', fn: function(){}, icon:Ext.MessageBox.ERROR});
                                 }
                             });
@@ -324,7 +324,7 @@ function main()
                 {
                     text: 'Cancel',
                     handler: function(){
-                        newProjectWindow.close();
+                        newProjectWindow.hide();
                     }
                 }
             ]
@@ -605,69 +605,15 @@ function main()
     // register the App.BookDetail class with an xtype of bookdetail
     Ext.reg('bookdetail', App.BookDetail);
 
-    var projectDetailsForm = new Ext.FormPanel({
-        //title: '&nbsp;',
-        labelWidth: 75, // label settings here cascade unless overridden
-        frame:true,
-
-        bodyStyle:'padding:5px 5px 0',
-        width: 700,
-        labelWidth: 200,
-        defaults: {width: 230},
-        defaultType: 'textfield',
-        labelAlign: 'right',
-
-        items: [
-            {
-                xtype: 'compositefield',
-                fieldLabel: 'Project',
-                msgTarget : 'side',
-                anchor    : '-20',
-                defaults: { flex: 1 },
-                items: [
-                    {
-                        xtype: 'displayfield',
-                        value: (project.PROJECT_NAME ? project.PROJECT_NAME : '')
-                    },
-                    {
-                       xtype: 'displayfield',
-                       value: 'Created Since: ' + (project.CREATE_DATE ? project.CREATE_DATE : '')
-                    }
-                ]
-            },{
-                xtype: 'compositefield',
-                fieldLabel: 'Language',
-                msgTarget : 'side',
-                anchor    : '-20',
-                defaults: { flex: 1 },
-                items: [
-                    {
-                        xtype: 'displayfield',
-                        fieldLabel: 'Source Language',
-                        value: (project.LOCALE ? project.COUNTRY + ' ' + project.LANGUAGE + ' ('+project.LOCALE+')' : '')
-                    },
-                    {
-                       xtype: 'displayfield',
-                       value: '&nbsp;&nbsp;&nbsp;Last Update: ' + (project.UPDATE_DATE ? project.UPDATE_DATE : '')
-                    }
-                ]
-            },{
-                xtype: 'displayfield',
-                fieldLabel: 'Records Count',
-                value: (project.NUM_RECORDS ? project.NUM_RECORDS : '')
-            }
-        ]
-    });
-
-    var northPanelItems = new Array();
     var northPanelHeight = 140;
 
     if (defaultProject) {
         projectsCombo.setValue(defaultProject);
-        northPanelItems.push(projectDetailsForm);
     } else {
         northPanelHeight = 30;
     }
+
+    projectsCombo.setValue(defaultProject);
 
     viewport = new Ext.Viewport({
         layout: 'border',

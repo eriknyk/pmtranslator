@@ -32,11 +32,11 @@ class Translation
                 $whereList[] = $key . '=' . $this->dbh->quote($value);
             }
 
-            $sql .= " WHERE ".implode(',', $whereList);
+            $sql .= " WHERE ".implode(' AND ', $whereList);
         }
 
         try {
-
+            error_log($sql);
             $rows = $this->dbh->query($sql);
 
             if (! $rows) {
@@ -137,10 +137,9 @@ EOL;
         ));
         $this->dbh->exec($sql);
 
-        $this->dbh->exec("CREATE INDEX ID_index USING BTREE ON lookup (ID);");
-        $this->dbh->exec("CREATE INDEX REF_1_index USING BTREE ON lookup (REF_1);");
-        $this->dbh->exec("CREATE INDEX REF_2_index USING BTREE ON lookup (REF_2);");
-        $this->dbh->exec("CREATE INDEX REF_LOC_index USING BTREE ON lookup (REF_LOC);");
-        $this->dbh->exec("CREATE INDEX MSG_ID_index USING BTREE ON lookup (MSG_ID);");
+        $this->dbh->exec("CREATE INDEX REF_1_index USING BTREE ON $projName (REF_1);");
+        $this->dbh->exec("CREATE INDEX REF_2_index USING BTREE ON $projName (REF_2);");
+        $this->dbh->exec("CREATE INDEX REF_LOC_index USING BTREE ON $projName (REF_LOC);");
+        $this->dbh->exec("CREATE INDEX MSG_ID_index USING BTREE ON $projName (MSG_ID);");
     }
 }
