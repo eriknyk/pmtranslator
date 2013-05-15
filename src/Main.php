@@ -193,7 +193,6 @@ class Main
                         'REF_2' => $poHandler->translatorComments[1],
                         'REF_LOC' => $poHandler->references[0],
                     );
-
                     $matchRecord = $translation->select('*', $where);
 
                     if (! empty($matchRecord)) {
@@ -216,7 +215,17 @@ class Main
                         'MSG_ID' => $rowTranslation['msgid']
                     );
 
-                    $translation->update(array('TRANSLATED_MSG_STR'=> $rowTranslation['msgstr']), $record);
+                    $matchRecord = $translation->select('*', $record);
+
+                    if (! empty($matchRecord)) {
+
+                        // update only if the string never was updated by the user
+                        // if it does skip update to prevent overwrite the user changes
+                        // it is considered the last valid change, those that was made by the user and not incoming changes froom .po file
+                        if ($matchRecord['MSG_ID'] == $rowTranslation['msgstr']) {
+                            $translation->update(array('TRANSLATED_MSG_STR'=> $rowTranslation['msgstr']), $record);
+                        }
+                    }
                 }
             }
 
