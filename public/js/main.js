@@ -118,6 +118,7 @@ function main()
     });
 
     var comboPageSize = new Ext.form.ComboBox({
+        id: 'pageSize',
         typeAhead     : false,
         mode          : 'local',
         triggerAction : 'all',
@@ -387,20 +388,22 @@ function main()
                                 waitTitle:'',
                                 waitMsg: 'Uploading...',
                                 success: function(o, resp){
-                                    w.close();
+                                    w.hide();
                                     grid.store.reload();
 
                                     Ext.MessageBox.show({
-                                        width: 500,
+                                        width: 350,
                                         height: 500,
-                                        msg: "<pre style='font-size:10px'>"+resp.result.message+"</pre>",
+                                        msg: htmlentities_decode(resp.result.message),
                                         buttons: Ext.MessageBox.OK,
                                         icon: Ext.MessageBox.INFO
                                     });
                                 },
                                 failure: function(o, resp){
-                                    w.close();
-                                    Ext.MessageBox.show({title: '', msg: resp.result.msg, buttons: Ext.MessageBox.OK, animEl: 'mb9', fn: function(){}, icon: Ext.MessageBox.ERROR});
+                                    //alert(resp);
+                                    console.log(resp);
+                                    w.hide();
+                                    Ext.MessageBox.show({title: '', msg: htmlentities_decode(resp.result.message), buttons: Ext.MessageBox.OK, animEl: 'mb9', fn: function(){}, icon: Ext.MessageBox.ERROR});
                                 }
                             });
                         }
@@ -469,6 +472,51 @@ function main()
         ]
     });
 
+    var untranslatedFilter = new Ext.Button({
+        id: 'untranslatedFilter',
+        text: 'Untranslated',
+        icon: 'public/images/lines.png',
+        enableToggle: true,
+        toggleHandler: onItemToggle,
+        allowDepress: false,
+        pressed: false
+        // handler: function () {
+        //     //Ext.getCmp('untranslatedFilter').setValue('1');
+        //     store.load({params:{untranslatedFilter: '1', start: 0 , limit: Ext.getCmp('pageSize').getValue(), project: defaultProject}});
+        // }
+    });
+
+    var allFilter = new Ext.Action({
+        id: 'allFilter',
+        text: 'All',
+        icon: 'public/images/show_lines.png',
+        enableToggle: true,
+        toggleHandler: onItemToggle,
+        allowDepress: false,
+        pressed: true
+        // handler: function () {
+        //     //Ext.getCmp('untranslatedFilter').setValue('');
+        //     store.load({params:{untranslatedFilter: '', start: 0 , limit: Ext.getCmp('pageSize').getValue(), project: defaultProject}});
+        // }
+    });
+
+    function onItemToggle(item, pressed)
+    {
+        switch ( item.id ) {
+            case 'untranslatedFilter' :
+                Ext.getCmp('allFilter').toggle( false, true);
+                store.setBaseParam('untranslatedFilter', '1');
+                store.load({params:{untranslatedFilter: '1', start: 0 , limit: Ext.getCmp('pageSize').getValue(), project: defaultProject}});
+                break;
+
+            case 'allFilter' :
+                store.setBaseParam('untranslatedFilter', '');
+                Ext.getCmp('untranslatedFilter').toggle( false, true);
+                store.load({params:{untranslatedFilter: '', start: 0 , limit: Ext.getCmp('pageSize').getValue(), project: defaultProject}});
+                break;
+        }
+    }
+
     var uploadSource = new Ext.Action({
         text: 'Update Project',
         icon: 'public/images/edit.png',
@@ -501,6 +549,35 @@ function main()
         }
     });
 
+    var searchTxt = new Ext.form.TextField ({
+        text: 'Seach',
+        emptyText: 'Enter a search term',
+        id: 'searchTxt',
+        //ctCls:'pm_search_text_field',
+        allowBlank: true,
+        width: 150,
+        listeners: {
+            specialkey: function(f, e){
+                if (e.getKey() == e.ENTER) {
+                    doSearch();
+                }
+            }
+        }
+    });
+
+    function doSearch()
+    {
+        var searchTerm = Ext.getCmp('searchTxt').getValue();
+        store.load({params:{searchTerm: searchTerm, start: 0 , limit: Ext.getCmp('pageSize').getValue(), project: defaultProject}});
+    }
+
+
+    function doClear()
+    {
+        Ext.getCmp('searchTxt').setValue('');
+        store.load({params:{searchTerm: '', start: 0 , limit: Ext.getCmp('pageSize').getValue(), project: defaultProject}});
+    }
+
     grid = new Ext.grid.GridPanel({
         title: '&nbsp;',
         store: store,
@@ -512,14 +589,34 @@ function main()
         view: new Ext.grid.GroupingView({
             markDirty: false
         }),
-        tbar: [uploadTarget, exportTarget],
+        tbar: [
+            '&nbsp;&nbsp;',
+            allFilter,
+            untranslatedFilter,
+            '-', '-',
+            uploadTarget,
+            exportTarget,
+            '->',
+            searchTxt,
+            {
+                text: 'X',
+                handler: doClear
+            }, {
+                text: 'Search',
+                handler: doSearch
+            }
+        ],
 
         columns: [
-        new Ext.grid.RowNumberer(),
+        //new Ext.grid.RowNumberer(),
         {
             id: 'ID',
             dataIndex: 'ID',
-            hidden: true
+            header: '#',
+            hidden: false,
+            width: '15px',
+            sortable: false,
+            menuDisabled: true
         },
         {
             id: 'MSG_STR',
@@ -581,7 +678,7 @@ function main()
             '<tr><td class="label">Records Count:</td><td> {NUM_RECORDS}</td></tr></table>'
         ],
         // startingMarup as a new property
-        startingMarkup: 'Please select a book to see additional details',
+        startingMarkup: 'No project found, to create a new project click on [New Project] button.',
         // override initComponent to create and compile the template
         // apply styles to the body of the panel and initialize
         // html to startingMarkup
@@ -607,10 +704,11 @@ function main()
 
     var northPanelHeight = 140;
 
+
     if (defaultProject) {
         projectsCombo.setValue(defaultProject);
     } else {
-        northPanelHeight = 30;
+        northPanelHeight = 100;
     }
 
     projectsCombo.setValue(defaultProject);
@@ -654,9 +752,10 @@ function main()
         ]
     });
 
-
     var detailPanel = Ext.getCmp('detailPanel');
-    detailPanel.updateDetail(project);
+
+    if (defaultProject)
+        detailPanel.updateDetail(project);
 }
 
 
@@ -736,4 +835,12 @@ var cookie = {
     erase: function(name) {
       Tools.createCookie(name,"",-1);
     }
-  }
+}
+
+
+function htmlentities(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+}
+function htmlentities_decode(str) {
+    return str.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, '\'');
+}

@@ -33,7 +33,7 @@ class Main
             $projects[] = array($proj['PROJECT_NAME']);
         }
 
-        include 'view/main.php';
+        include 'view/main.phtml';
     }
 
     public function api()
@@ -43,6 +43,7 @@ class Main
         }
 
         $project = $_REQUEST['project'];
+        $untranslatedFilter = array_key_exists('untranslatedFilter', $_REQUEST) ? $_REQUEST['untranslatedFilter'] : false;
 
         $translation = new Translation();
 
@@ -56,7 +57,12 @@ class Main
         $where = '';
 
         if ($filter !== false) {
-            $where = "WHERE MSG_STR LIKE '%$filter%' OR TRANSLATED_MSG_STR LIKE '%$filter%'";
+            $where = "WHERE UPPER(MSG_STR) LIKE '%$filter%' OR UPPER(TRANSLATED_MSG_STR) LIKE '%$filter%'";
+        }
+
+        if (! empty($untranslatedFilter)) {
+            $where .= empty($where) ? 'WHERE ' : ' AND ';
+            $where .= 'MSG_STR=TRANSLATED_MSG_STR';
         }
 
         $orderBy = "ORDER BY ID ASC";
@@ -65,7 +71,15 @@ class Main
         }
 
         $result = $translation->query("SELECT * FROM $project $where $orderBy LIMIT $start,$limit");
-        $allRowsCount = $translation->query("SELECT COUNT(*) AS TOTAL FROM $project")->fetch();
+        $resultSet = $translation->query("SELECT COUNT(*) AS TOTAL FROM $project $where");
+
+        if ($resultSet) {
+            $allRowsCount = $resultSet->fetch();
+            $totalCount = $allRowsCount['TOTAL'];
+        } else {
+            $result = array();
+            $totalCount = 0;
+        }
 
         $rows = array();
 
@@ -78,7 +92,7 @@ class Main
         }
 
         $data['data'] = $rows;
-        $data['totalCount'] = $allRowsCount['TOTAL'];
+        $data['totalCount'] = $totalCount;
 
         echo json_encode($data);
         //$this->set('data', $data);
@@ -134,25 +148,28 @@ class Main
         $results = new stdClass();
         $translation = new Translation();
 
-        if (! is_dir($tmpDir)) {
-            mkdir($tmpDir);
-            chmod($tmpDir, 0777);
-        }
-
         try {
+            if (! array_key_exists('project', $_REQUEST)) {
+                throw new Exception("Bad Request: Param 'project' is missing.");
+            }
+
+            $projectName = $_REQUEST['project'];
+
+            // if (empty($result)) {
+            //     throw new Exception("Error: Project '$projectName' does not exist!");
+            // }
+
+            if (! is_dir($tmpDir)) {
+                mkdir($tmpDir);
+                chmod($tmpDir, 0777);
+            }
+
             move_uploaded_file($_FILES['po_file']['tmp_name'], $poFile);
 
             $poHandler = new i18n_PO($poFile);
             $poHandler->readInit();
             $poHeaders = $poHandler->getHeaders();
             //print_r($poHeaders);
-
-            if ($type == 'source') {
-                //TODO currently we only accepts english languages as project base translations
-                if (strtolower($poHeaders['X-Poedit-Language']) != 'english') {
-                    throw new Exception("Error: Invalid source languaje");
-                }
-            }
 
             // resolve locale
             $locale = self::resolveLocale($poHeaders['X-Poedit-Country'], $poHeaders['X-Poedit-Language']);
@@ -163,13 +180,27 @@ class Main
             $countItemsSuccess = 0;
             $errorMsg = '';
 
-            // if $_REQUEST['project_name'] is passed as param a new project should be created
-            if (! $translation->projectExists($_REQUEST['project'])) {
-                 $translation->createProject($_REQUEST['project']);
+            if ($translation->projectExists($projectName)) {
+                // project already exists, so it is a request to update project
+                $translation->setTarget('PROJECT');
+                $result = $translation->select('*', array('PROJECT_NAME' => $projectName)); // load project data
+                $project = $result[0];
+
+                if ($type == 'source') {
+                    // the project already exists, we need validate that this .po locale must be the same at created project
+                    print_r($locale,$project['LOCALE']);
+                    if ($locale != $project['LOCALE']) {
+                        throw new Exception(
+                            "Error: Invalid languaje on .po source, it must be the same at the project.<br/>".
+                            "Given: $locale - Expected: {$project['LOCALE']}"
+                        );
+                    }
+                }
+            } else {
+                $translation->createProject($projectName);
             }
 
-            $translation->setTarget($_REQUEST['project']);
-
+            $translation->setTarget($projectName);
 
             while ($rowTranslation = $poHandler->getTranslation()) {
                 if (! isset( $poHandler->translatorComments[0] ) || ! isset( $poHandler->translatorComments[1] ) || ! isset( $poHandler->references[0] )) {
@@ -218,11 +249,11 @@ class Main
                     $matchRecord = $translation->select('*', $record);
 
                     if (! empty($matchRecord)) {
-
+                        $matchRecord = $matchRecord[0];
                         // update only if the string never was updated by the user
                         // if it does skip update to prevent overwrite the user changes
                         // it is considered the last valid change, those that was made by the user and not incoming changes froom .po file
-                        if ($matchRecord['MSG_ID'] == $rowTranslation['msgstr']) {
+                        if ($matchRecord['MSG_ID'] == $matchRecord['TRANSLATED_MSG_STR']) {
                             $translation->update(array('TRANSLATED_MSG_STR'=> $rowTranslation['msgstr']), $record);
                         }
                     }
@@ -251,13 +282,13 @@ class Main
 
             $results->success = true;
             $results->recordsCount = $countItems;
-            $results->message = "New Records: $countItems\n";
-            $results->message .= "Updated Records: $updatedItems";
+            $results->message = "Process completed successfuly!<br/>New Records: $countItems<br/>Updated Records: $updatedItems";
         } catch (Exception $e) {
             $results->success = false;
             $results->message = $e->getMessage();
         }
 
+        $results->message = htmlentities($results->message);
 
         echo json_encode($results);
     }

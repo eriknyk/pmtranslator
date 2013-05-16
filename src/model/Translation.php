@@ -99,6 +99,7 @@ class Translation
 
     public function query($sql)
     {
+        error_log($sql);
         return $this->dbh->query($sql);
     }
 
@@ -110,7 +111,7 @@ class Translation
     public function projectExists($projName)
     {
         $this->setTarget('PROJECT');
-        return $this->select(array('PROJECT_NAME' => $projName)) ? true : false;
+        return $this->select('*', array('PROJECT_NAME' => $projName)) ? true : false;
     }
 
     public function createProject($projName)
