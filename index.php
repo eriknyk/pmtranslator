@@ -1,20 +1,28 @@
 <?php
 error_reporting(E_ALL);
-$config = parse_ini_file('config.ini');
 
-$config['base_url'] = rtrim($config['base_url'], '/') . '/'; // to ensure that always have a slash at string ending
-
-//print_r($config);
-
-//echo '<pre>';print_r($_SERVER); die;
+if (! file_exists('config.ini')) {
+    echo 'Configuration file is missing!<br />';
+    echo 'Please make a copy of config.ini-dist with name config.ini, and configure settings.';
+    exit;
+}
 
 define('HOME_DIR', dirname(__FILE__));
+function pr ($v) { echo "<pre>".print_r($v, true)."</pre>";}
 
+$config = parse_ini_file('config.ini');
+$config['base_url'] = rtrim($config['base_url'], '/') . '/';
 $url = explode('?', $_SERVER['REQUEST_URI']);
 $url = $url[0];
-$url = explode('/', trim(str_replace($config['base_url'], '', $url), '/'));
 
 
+if (substr($url, 0, strlen($config['base_url'])) == $config['base_url']) {
+    $url = substr($url, strlen($config['base_url']));
+}
+
+$url = explode('/', $url);
+
+//pr($url); die;
 $controller = empty($url[0]) ? 'Main': $url[0];
 $action = empty($url[1]) ? 'index': $url[1];
 
