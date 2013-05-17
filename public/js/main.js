@@ -153,7 +153,6 @@ function main()
         id: 'Language',
         fieldLabel: 'Language',
         typeAhead     : true,
-        typeAhead     : true,
         mode          : 'local',
         selectOnFocus : true,
         autocomplete  : true,
@@ -612,9 +611,9 @@ function main()
         {
             id: 'ID',
             dataIndex: 'ID',
-            header: '#',
-            hidden: false,
-            width: '15px',
+            //header: '#',
+            hidden: true,
+            //width: '40px',
             sortable: false,
             menuDisabled: true
         },
@@ -625,7 +624,7 @@ function main()
             width: screenWidth/2,
             sortable: true,
             renderer: function(val) {
-                return val; //return '<pre>' + val + '</pre>';
+                return ' '+val; //return '<pre>' + val + '</pre>';
             }
         },{
             id: 'TRANSLATED_MSG_STR',
@@ -643,18 +642,49 @@ function main()
 
     var projectsCombo = new Ext.form.ComboBox({
         id: 'projects',
-        typeAhead     : false,
+        //typeAhead     : false,
+        //mode          : 'local',
+        //triggerAction : 'all',
+        // store: new Ext.data.SimpleStore({
+        //     fields: ['size'],
+        //     data: projects,
+        //     autoLoad: true,
+        //     listeners: {
+        //         load: function() {
+        //             console.log(this);
+        //             // i = cmbDateFormat.store.findExact('id', default_date_format, 0);
+        //             // cmbDateFormat.setValue(cmbDateFormat.store.getAt(i).data.id);
+        //             // cmbDateFormat.setRawValue(cmbDateFormat.store.getAt(i).data.name);
+        //         }
+        //     }
+        // }),
+        typeAhead     : true,
         mode          : 'local',
+        selectOnFocus : true,
+        autocomplete  : true,
         triggerAction : 'all',
-        store: new Ext.data.SimpleStore({
-            fields: ['size'],
-            data: projects,
-            autoLoad: true
+        store : new Ext.data.Store( {
+            autoLoad: true,
+            proxy : new Ext.data.HttpProxy( {
+                url : 'main/getProjects',
+                method : 'POST'
+            }),
+            //baseParams : {request : 'getLangList'},
+            reader : new Ext.data.JsonReader( {
+                fields : [ {name : 'ID'}, {name : 'NAME'} ]
+            }),
+            listeners: {
+                load: function() {
+                    i = projectsCombo.store.findExact('ID', project.PROJECT_ID, 0);
+                    projectsCombo.setValue(projectsCombo.store.getAt(i).data.ID);
+                    projectsCombo.setRawValue(projectsCombo.store.getAt(i).data.NAME);
+                }
+            }
         }),
-        valueField: 'size',
-        displayField: 'size',
+        valueField: 'ID',
+        displayField: 'NAME',
         width: 250,
-        editable: false,
+        editable: true,
         listeners:{
             select: function(c,d,i){
                 selectProject();
@@ -662,19 +692,23 @@ function main()
         }
     });
 
+    //projectsCombo.setValue ( defaultProject);
+
     Ext.ns('App');
 
     App.BookDetail = Ext.extend(Ext.Panel, {
         // add tplMarkup as a new property
         tplMarkup: [
-            '<table class="datails">',
+            '<table class="datails" border=0>',
             '<tr><td class="label">Project:</td><td>{PROJECT_NAME}</td>',
             '<td class="label">Source Country:</td><td> {COUNTRY}</td>',
             '<td class="label">Target Country:</td><td> {TARGET_COUNTRY}</td></tr>',
             '<tr><td class="label">Created Since:</td><td>{CREATE_DATE}</td>',
             '<td class="label">Source Language:</td><td> {LANGUAGE}</td>',
             '<td class="label">Target Language:</td><td> {TARGET_LANGUAGE}</td></tr>',
-            '<tr><td class="label">Last Update:</td><td>{UPDATE_DATE}</td></tr>',
+            '<tr><td class="label">Last Update:</td><td>{UPDATE_DATE}</td>',
+            '<td class="label">Source Locale:</td><td>{LOCALE}</td>',
+            '<td class="label">Target Locale:</td><td>{TARGET_LOCALE}</td></tr>',
             '<tr><td class="label">Records Count:</td><td> {NUM_RECORDS}</td></tr></table>'
         ],
         // startingMarup as a new property
@@ -704,14 +738,11 @@ function main()
 
     var northPanelHeight = 140;
 
-
-    if (defaultProject) {
-        projectsCombo.setValue(defaultProject);
-    } else {
+    if (! defaultProject) {
         northPanelHeight = 100;
     }
 
-    projectsCombo.setValue(defaultProject);
+
 
     viewport = new Ext.Viewport({
         layout: 'border',
@@ -800,8 +831,7 @@ function uploadFile(type, reload)
 
 function selectProject()
 {
-    var project = Ext.getCmp('projects').getValue();
-    location.href = base_url + '?project=' + project;
+    location.href = base_url + '?id=' + Ext.getCmp('projects').getValue();
 
     return;
     store.setBaseParam('project', project);

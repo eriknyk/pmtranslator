@@ -13,24 +13,27 @@ class Main
         $translation->setTarget('PROJECT');
         $projectsList = $translation->select();
         $projects = array();
-        //var_dump($_GET); die;
-        if (isset($_GET['project'])) {
+
+        if (! isset($_GET['id'])) {
+            $project = count($projectsList) > 0 ? $projectsList[0] : array();
+        } else {
             foreach ($projectsList as $proj) {
-                if ($proj['PROJECT_NAME'] == $_GET['project']) {
+                if ($proj['PROJECT_ID'] == $_GET['id']) {
                     $project = $proj;
                     break;
                 }
             }
-        }
 
-        if (empty($project)) {
-            $project = count($projectsList) > 0 ? $projectsList[0] : array();
+            if (empty($project)) {
+                echo 'Project does not exist!';
+                die;
+            }
         }
 
         $config = $this->config;
 
         foreach ($projectsList as $proj) {
-            $projects[] = array($proj['PROJECT_NAME']);
+            $projects[] = array($proj['PROJECT_NAME'] . ' ('.$proj['TARGET_LOCALE'].')');
         }
 
         include 'view/main.phtml';
@@ -177,6 +180,7 @@ class Main
             ////
             $countItems = 0;
             $updatedItems = 0;
+            $updatedTranslationsItems = 0;
             $countItemsSuccess = 0;
             $errorMsg = '';
 
@@ -254,6 +258,7 @@ class Main
                         // if it does skip update to prevent overwrite the user changes
                         // it is considered the last valid change, those that was made by the user and not incoming changes froom .po file
                         if ($matchRecord['MSG_ID'] == $matchRecord['TRANSLATED_MSG_STR']) {
+                            $updatedTranslationsItems++;
                             $translation->update(array('TRANSLATED_MSG_STR'=> $rowTranslation['msgstr']), $record);
                         }
                     }
@@ -282,7 +287,10 @@ class Main
 
             $results->success = true;
             $results->recordsCount = $countItems;
-            $results->message = "Process completed successfuly!<br/>New Records: $countItems<br/>Updated Records: $updatedItems";
+            $results->message = "Process completed successfuly!<br/><br/>" .
+                                "New Records: $countItems<br/>" .
+                                "Updated Source Records: $updatedItems<br/>" .
+                                "Updated Translations Records: $updatedTranslationsItems";
         } catch (Exception $e) {
             $results->success = false;
             $results->message = $e->getMessage();
@@ -291,6 +299,23 @@ class Main
         $results->message = htmlentities($results->message);
 
         echo json_encode($results);
+    }
+
+    public function getProjects()
+    {
+        $translation = new Translation();
+        $translation->setTarget('PROJECT');
+        $projectsList = $translation->select();
+        $projects = array();
+
+        foreach ($projectsList as $proj) {
+            $projects[] = array(
+                'ID' => $proj['PROJECT_ID'],
+                'NAME' => $proj['PROJECT_NAME'] . ' ('.$proj['TARGET_LOCALE'].')'
+            );
+        }
+
+        echo json_encode($projects);
     }
 
     public function getCountries()
@@ -317,25 +342,30 @@ class Main
 
         set_time_limit(0);
 
-        $project = $_REQUEST['project'];
-        $country = $_REQUEST['country'];
-        $language = $_REQUEST['language'];
-        $locale = self::resolveLocale($country, $language);
+        $projectName = $_REQUEST['project'];
         $version = '2.0';
         $tmpDir = HOME_DIR . '/tmp/';
-
         $translation = new Translation();
-        $translation->setTarget($project);
+        $translation->setTarget('PROJECT');
+        $result = $translation->select('*', array('PROJECT_NAME' => $projectName));
 
+        if (empty($result)) {
+            throw new Exception("ERROR: Project '$projectName' does not exist!");
+        }
+
+        $project = $result[0];
+        $locale = $project['TARGET_LOCALE'];
+
+        $translation->setTarget($projectName);
         $rows = $translation->select();
 
-        $filename = $tmpDir . $project.'.'.$locale . '.po';
+        $filename = $tmpDir . $projectName.'.'.$locale . '.po';
 
         $poFile = new i18n_PO( $filename );
         $poFile->buildInit();
 
         //setting headers
-        $poFile->addHeader( 'Project-Id-Version', ucfirst(strtolower($project)) .' - '.$version);
+        $poFile->addHeader( 'Project-Id-Version', ucfirst(strtolower($projectName)) .' - '.$version);
         $poFile->addHeader( 'POT-Creation-Date', '' );
         $poFile->addHeader( 'PO-Revision-Date', date( 'Y-m-d H:i:s' ) );
         $poFile->addHeader( 'Last-Translator', '' );
