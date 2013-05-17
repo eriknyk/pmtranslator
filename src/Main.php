@@ -125,6 +125,9 @@ class Main
                 array('ID' => $data->ID)
             );
 
+            $translation->setTarget('PROJECT');
+            $translation->update(array('UPDATE_DATE' => date('Y-m-d H:i:s')), array('PROJECT_NAME' => $project));
+
             $result->success = true;
             $result->message = 'Updated Successfully!';
             $result->data = $data;
@@ -311,7 +314,7 @@ class Main
         foreach ($projectsList as $proj) {
             $projects[] = array(
                 'ID' => $proj['PROJECT_ID'],
-                'NAME' => $proj['PROJECT_NAME'] . ' ('.$proj['TARGET_LOCALE'].')'
+                'NAME' => $proj['PROJECT_NAME'] . ' ('.$proj['LOCALE'].' -> '.$proj['TARGET_LOCALE'].')'
             );
         }
 
