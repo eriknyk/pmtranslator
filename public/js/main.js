@@ -647,7 +647,18 @@ function main()
                 allowBlank: true
             }
         }],
-        bbar: bbar
+        bbar: bbar,
+
+        listeners: {
+            render: function(){
+                this.loadMask = new Ext.LoadMask(this.body, {msg:'Loading...'});
+                grid.getSelectionModel().on('rowselect', function(){
+                    var rowSelected = grid.getSelectionModel().getSelected();
+                    if (window.console)
+                        console.log(rowSelected.data);
+                });
+            }
+        }
     });
 
     var projectsCombo = new Ext.form.ComboBox({
