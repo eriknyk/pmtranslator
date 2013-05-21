@@ -271,9 +271,10 @@ class Main
 
                 } elseif ($type == 'target') {
                     $record = array(
-                        'REF_1' => $poHandler->translatorComments[0],
-                        'REF_2' => $poHandler->translatorComments[1],
-                        'REF_LOC' => $poHandler->references[0],
+                        // this apply trim() is a dummy solutions for accidental blank spaces on target .po
+                        'REF_1' => trim($poHandler->translatorComments[0]),
+                        'REF_2' => trim($poHandler->translatorComments[1]),
+                        'REF_LOC' => trim($poHandler->references[0]),
                         //'MSG_ID' => $rowTranslation['msgid'] // <- some people have modified even this record
                     );
 
