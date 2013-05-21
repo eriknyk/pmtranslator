@@ -499,7 +499,7 @@ class Main
     protected function log($str)
     {
         if (! $this->logging) {
-            return fase;
+            return false;
         }
 
         if (! is_string($str)) {
