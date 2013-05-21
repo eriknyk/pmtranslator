@@ -5,6 +5,15 @@ require_once 'model/Translation.php';
 class Main
 {
     public $config;
+    public $logging = false;
+    public $logFp;
+
+    public function __destruct()
+    {
+        if ($this->logFp) {
+            fclose($this->logFp);
+        }
+    }
 
     public function index()
     {
@@ -283,10 +292,20 @@ class Main
                         // update only if the string never was updated by the user
                         // if it does skip update to prevent overwrite the user changes
                         // it is considered the last valid change, those that was made by the user and not incoming changes froom .po file
-                        if ($matchRecord['MSG_ID'] == $matchRecord['TRANSLATED_MSG_STR']) {
+                        if ($matchRecord['MSG_STR'] == $matchRecord['TRANSLATED_MSG_STR']) {
                             $updatedTranslationsItems++;
-                            $translation->update(array('TRANSLATED_MSG_STR'=> $rowTranslation['msgstr']), $record);
+                            $res = $translation->update(array('TRANSLATED_MSG_STR'=> $rowTranslation['msgstr']), $record);
+
+                            if ($res == 0) {
+                                $this->log('UPDATE FAILED!');
+                                $this->log($translation->getLastSql());
+                            }
+                        } else {
+                            $this->log('SKIPPED: ' . $matchRecord['MSG_ID'] .'=='. $matchRecord['TRANSLATED_MSG_STR'] ."  ---> ". $translation->getLastSql());
                         }
+                    } else {
+                        $this->log('NOT FOUND:');
+                        $this->log($translation->getLastSql());
                     }
                 }
             }
@@ -305,7 +324,7 @@ class Main
                     $record['TARGET_LANGUAGE'] = $_REQUEST['Language'];
                     $record['TARGET_LOCALE'] = self::resolveLocale($_REQUEST['Country'], $_REQUEST['Language']);
                 }
-                $translation->update(
+                $res = $translation->update(
                     $record,
                     array('PROJECT_NAME' => $_REQUEST['project'])
                 );
@@ -466,6 +485,33 @@ class Main
         }
 
         return $locale;
+    }
+
+    public function enableLogging($value)
+    {
+        $this->logging = $value;
+
+        if ($this->logging) {
+            $this->logFp = fopen(HOME_DIR . '/tmp/translator.log', 'a+');
+        }
+    }
+
+    protected function log($str)
+    {
+        if (! $this->logging) {
+            return fase;
+        }
+
+        if (! is_string($str)) {
+            ob_start();
+            print_r($str);
+            $str = ob_get_contents();
+            ob_end_clean();
+        }
+
+        $line = $str . "\n";
+
+        fwrite($this->logFp,  $line);
     }
 }
 

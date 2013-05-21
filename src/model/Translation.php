@@ -5,6 +5,7 @@ class Translation
     protected $dbh;
     protected $config;
     protected $tableTarget;
+    protected $lastSql = '';
 
     public function __construct()
     {
@@ -36,7 +37,7 @@ class Translation
         }
 
         try {
-            error_log($sql);
+            $this->lastSql = $sql;
             $rows = $this->dbh->query($sql);
 
             if (! $rows) {
@@ -73,7 +74,8 @@ class Translation
         $sql .= "(".implode(',', $keys).") VALUES (".implode(',', $values).");";
 
         try {
-            $this->dbh->exec($sql);
+            $this->lastSql = $sql;
+            return $this->dbh->exec($sql);
         } catch (PDOException $e) {
             echo 'Query Error: ' . $e->getMessage();
         }
@@ -93,13 +95,17 @@ class Translation
 
         $sql = "UPDATE ".$this->tableTarget." SET ".implode(',', $set)." WHERE ".implode(' AND ', $where).";";
 
-        //error_log($sql);
-        $this->dbh->exec($sql);
+        try {
+            $this->lastSql = $sql;
+            return $this->dbh->exec($sql);
+        } catch (PDOException $e) {
+            throw $e;
+        }
     }
 
     public function query($sql)
     {
-        error_log($sql);
+        //error_log($sql);
         return $this->dbh->query($sql);
     }
 
@@ -142,5 +148,10 @@ EOL;
         $this->dbh->exec("CREATE INDEX REF_2_index USING BTREE ON $projName (REF_2);");
         $this->dbh->exec("CREATE INDEX REF_LOC_index USING BTREE ON $projName (REF_LOC);");
         $this->dbh->exec("CREATE INDEX MSG_ID_index USING BTREE ON $projName (MSG_ID);");
+    }
+
+    public function getLastSql()
+    {
+        return $this->lastSql;
     }
 }

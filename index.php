@@ -45,6 +45,11 @@ try {
     $c = new $controller();
     $c->config = $config;
 
+    if (isset($config['logging']) && $config['logging'] == '1') {
+        $c->enableLogging(true);
+    }
+
+
     if (! method_exists($c, $action)) {
         throw new Exception("Action '$controller/$action' does not exist");
     }
