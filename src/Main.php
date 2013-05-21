@@ -22,14 +22,12 @@ class Main
                 }
             }
         }
-        
-        $id = $_GET['id'];
 
-        if (! isset($id)) {
+        if (! isset($_GET['id'])) {
             $project = count($projectsList) > 0 ? $projectsList[0] : array();
         } else {
             foreach ($projectsList as $proj) {
-                if ($proj['PROJECT_ID'] == $id) {
+                if ($proj['PROJECT_ID'] == $_GET['id']) {
                     $project = $proj;
                     break;
                 }
