@@ -13,12 +13,23 @@ class Main
         $translation->setTarget('PROJECT');
         $projectsList = $translation->select();
         $projects = array();
-
+        
         if (! isset($_GET['id'])) {
+            if (isset($_GET['project'])) {
+                $rows = $translation->select('*', array('PROJECT_NAME' => $_GET['project']));
+                if (count($rows) > 0) {
+                    $_GET['id'] = $rows[0]['PROJECT_ID'];
+                }
+            }
+        }
+        
+        $id = $_GET['id'];
+
+        if (! isset($id)) {
             $project = count($projectsList) > 0 ? $projectsList[0] : array();
         } else {
             foreach ($projectsList as $proj) {
-                if ($proj['PROJECT_ID'] == $_GET['id']) {
+                if ($proj['PROJECT_ID'] == $id) {
                     $project = $proj;
                     break;
                 }
