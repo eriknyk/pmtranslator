@@ -13,7 +13,7 @@ class Main
         $translation->setTarget('PROJECT');
         $projectsList = $translation->select();
         $projects = array();
-        
+
         if (! isset($_GET['id'])) {
             if (isset($_GET['project'])) {
                 $rows = $translation->select('*', array('PROJECT_NAME' => $_GET['project']));
@@ -63,7 +63,7 @@ class Main
 
     public function api()
     {
-        if (empty($_REQUEST)) {
+        if (empty($_REQUEST) || ! isset($_REQUEST['project'])) {
             return $this->updateRecord();
         }
 
