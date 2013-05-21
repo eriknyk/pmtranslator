@@ -577,6 +577,32 @@ function main()
         store.load({params:{searchTerm: '', start: 0 , limit: Ext.getCmp('pageSize').getValue(), project: defaultProject}});
     }
 
+    var gridToolbar = new Array(
+        '&nbsp;&nbsp;',
+        allFilter,
+        untranslatedFilter,
+        '-', '-'
+    );
+
+    if (options.update_translations)
+        gridToolbar.push(uploadTarget);
+
+    if (options.export_translations)
+        gridToolbar.push(exportTarget);
+
+    gridToolbar.push('->');
+    gridToolbar.push(searchTxt);
+    gridToolbar.push({
+        text: 'X',
+        handler: doClear
+    });
+    gridToolbar.push({
+        text: 'Search',
+        handler: doSearch
+    });
+
+    gridToolbar.push();
+
     grid = new Ext.grid.GridPanel({
         title: '&nbsp;',
         store: store,
@@ -588,23 +614,7 @@ function main()
         view: new Ext.grid.GroupingView({
             markDirty: false
         }),
-        tbar: [
-            '&nbsp;&nbsp;',
-            allFilter,
-            untranslatedFilter,
-            '-', '-',
-            uploadTarget,
-            exportTarget,
-            '->',
-            searchTxt,
-            {
-                text: 'X',
-                handler: doClear
-            }, {
-                text: 'Search',
-                handler: doSearch
-            }
-        ],
+        tbar: gridToolbar,
 
         columns: [
         //new Ext.grid.RowNumberer(),
@@ -742,7 +752,13 @@ function main()
         northPanelHeight = 100;
     }
 
+    var detailPanelToolbar = new Array('&nbsp;&nbsp;Project: ', projectsCombo);
 
+    if (options.new_project)
+        detailPanelToolbar.push(newAction);
+
+    if (options.update_project)
+        detailPanelToolbar.push(uploadSource);
 
     viewport = new Ext.Viewport({
         layout: 'border',
@@ -773,12 +789,7 @@ function main()
                 height: northPanelHeight,
                 title: "Translator Tool",
                 //items: northPanelItems,
-                tbar: [
-                    '&nbsp;&nbsp;Project: ',
-                    projectsCombo,
-                    newAction,
-                    uploadSource
-                ]
+                tbar: detailPanelToolbar
             }
         ]
     });

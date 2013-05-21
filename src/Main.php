@@ -32,6 +32,19 @@ class Main
 
         $config = $this->config;
 
+        $defaultOptions = array(
+            'new_project'=>1,
+            'update_project'=>1,
+            'update_translations'=>1,
+            'export_translations'=>1
+        );
+
+        foreach ($config['options'] as $key => $value) {
+            $config['options'][$key] = $value == '1' || $value == 'true' ? true : false;
+        }
+
+        $config['options'] = array_merge($defaultOptions, $config['options']);
+
         foreach ($projectsList as $proj) {
             $projects[] = array($proj['PROJECT_NAME'] . ' ('.$proj['TARGET_LOCALE'].')');
         }

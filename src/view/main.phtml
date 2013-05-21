@@ -39,7 +39,8 @@
     <script>
         var projects = <?php echo json_encode($projects)?>;
         var project = <?php echo json_encode($project)?>;
-        var base_url = '<?php echo $config['base_url']?>'
+        var base_url = '<?php echo $config['base_url']?>';
+        var options = <?php echo json_encode($config['options'])?>;
     </script>
 
     <script type="text/javascript" src="public/js/main.js"></script>

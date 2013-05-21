@@ -10,11 +10,12 @@ if (! file_exists('config.ini')) {
 define('HOME_DIR', dirname(__FILE__));
 function pr ($v) { echo "<pre>".print_r($v, true)."</pre>";}
 
-$config = parse_ini_file('config.ini');
+$config = parse_ini_file('config.ini', true);
 $config['base_url'] = rtrim($config['base_url'], '/') . '/';
+$config['options'] = isset($config['options']) ? $config['options'] : array();
+
 $url = explode('?', $_SERVER['REQUEST_URI']);
 $url = $url[0];
-
 
 if (substr($url, 0, strlen($config['base_url'])) == $config['base_url']) {
     $url = substr($url, strlen($config['base_url']));
