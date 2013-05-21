@@ -134,7 +134,7 @@ class Main
 
         try {
             $translation->update(
-                array('TRANSLATED_MSG_STR' => $data->TRANSLATED_MSG_STR),
+                array('TRANSLATED_MSG_STR' => trim($data->TRANSLATED_MSG_STR)),
                 array('ID' => $data->ID)
             );
 
@@ -263,7 +263,7 @@ class Main
                         'REF_1' => $poHandler->translatorComments[0],
                         'REF_2' => $poHandler->translatorComments[1],
                         'REF_LOC' => $poHandler->references[0],
-                        'MSG_ID' => $rowTranslation['msgid']
+                        //'MSG_ID' => $rowTranslation['msgid'] // <- some people have modified even this record
                     );
 
                     $matchRecord = $translation->select('*', $record);
