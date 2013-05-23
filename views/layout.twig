@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>{% block title %}Welcome!{% endblock %}</title>
+
+        <link rel="stylesheet" type="text/css" href="{{ app.request.basepath }}/web/lib/extjs/resources/css/ext-all.css" />
+        <link rel="stylesheet" type="text/css" href="{{ app.request.basepath }}/web/lib/extjs/resources/css/xtheme-gray.css" />
+        <link rel="stylesheet" type="text/css" href="{{ app.request.basepath }}/web/css/ext-gray-extend.css" />
+        <link rel="stylesheet" type="text/css" href="{{ app.request.basepath }}/web/css/rowEditor.css" />
+        <link rel="stylesheet" type="text/css" href="{{ app.request.basepath }}/web/css/statusbar.css" />
+        <link rel="stylesheet" type="text/css" href="{{ app.request.basepath }}/web/css/main.css" />
+
+        {% block header %}{% endblock %}
+    </head>
+
+    <body>
+        {% block body %}{% endblock %}
+
+        <!-- ExtJS library: base/adapter -->
+        <script type="text/javascript" src="{{ app.request.basepath }}/web/lib/extjs/adapter/ext/ext-base.js"></script>
+
+        <!-- ExtJS library: all widgets -->
+        <script type="text/javascript" src="{{ app.request.basepath }}/web/lib/extjs/ext-all.js"></script>
+        <script type="text/javascript" src="{{ app.request.basepath }}/web/js/ux-all.js"></script>
+
+        {% block jsection %}{% endblock %}
+    </body>
+</html>

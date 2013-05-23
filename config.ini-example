@@ -1,0 +1,15 @@
+
+[app]
+    debug = true
+
+[database]
+    dsn = "mysql:dbname=translator;host=127.0.0.1"
+    db_user = root
+    db_password =
+
+[options]
+    new_project=1
+    update_project=1
+    update_translations=1
+    export_translations=1
+

@@ -1,0 +1,13 @@
+{
+    "require": {
+        "silex/silex": "1.0.*@dev",
+        "twig/twig": "1.12.*",
+        "symfony/twig-bridge": "2.2.*"
+    },
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-0": {
+            "PmTranslator": "src/"
+        }
+    }
+}

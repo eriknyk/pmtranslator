@@ -1,0 +1,18 @@
+{% extends 'layout.twig' %}
+{% block title %}Translator{% endblock %}
+
+{% block jsection %}
+<script>
+    var projects = {{ projects|json_encode()|raw }};
+    var project = {{ project|json_encode()|raw }};
+    var base_url = '{{ app.request.basepath }}/';
+    var options = {{ options|json_encode()|raw }};
+</script>
+<script type="text/javascript" src="{{ app.request.basepath }}/web/js/translate.js"></script>
+{% endblock %}
+
+{% block body %}
+
+<div id="editor-grid"></div>
+
+{% endblock %}
