@@ -16,6 +16,8 @@ use PmTranslator\Provider\PoHandlerServiceProvider;
 class Application extends \Silex\Application
 {
     protected $path;
+    protected $logging = false;
+    protected $loggingFp;
 
     /**
      * Constructor initialize services.
@@ -32,7 +34,12 @@ class Application extends \Silex\Application
         $this['debug'] = $config->get('app', 'debug');
         $this['database'] = $config->getSection('database');
         $this['options'] = $config->getSection('options');
-        //$this['cache.archives'] = $this->getCachePath() . 'archives';
+
+        $this->logging = $config->get('app', 'logging') ? true : false;
+
+        if ($this->logging) {
+            $this->enableLogging(true);
+        }
 
         // Register services
         $this->register(new TwigServiceProvider(), array(
@@ -97,6 +104,34 @@ class Application extends \Silex\Application
     public function getViewPath()
     {
         return $this->path . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR;
+    }
+
+    public function enableLogging($value)
+    {
+        $this->logging = $value;
+
+        if ($this->logging) {
+            $this->loggingFp = fopen($this->getPath() . 'cache/translator.log', 'a+');
+        }
+    }
+
+    public function log($str)
+    {
+        if (! $this->logging) {
+            return false;
+        }
+
+        if (! is_string($str)) {
+            ob_start();
+            print_r($str);
+            $str = ob_get_contents();
+            ob_end_clean();
+        }
+
+        $line = $str . PHP_EOL;
+        $line .= '..................................................................................' . PHP_EOL;
+
+        fwrite($this->loggingFp,  $line);
     }
 }
 

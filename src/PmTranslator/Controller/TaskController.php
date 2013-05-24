@@ -24,8 +24,8 @@ class TaskController implements ControllerProviderInterface
         /// POST: /task/upload
         ///
         $route->post('/task/upload', function() use ($app) {
-            return $app->json(array(), 501);
-
+            //return $app->json(array('success'=>true), 200);
+            //print_r($_REQUEST); die;
             set_time_limit(0);
 
             $type = $_REQUEST['type'];
@@ -77,7 +77,7 @@ class TaskController implements ControllerProviderInterface
 
                     if ($type == 'source') {
                         // the project already exists, we need validate that this .po locale must be the same at created project
-                        print_r($locale,$project['LOCALE']);
+                        //print_r($locale,$project['LOCALE']);
                         if ($locale != $project['LOCALE']) {
                             throw new \Exception(
                                 "Error: Invalid languaje on .po source, it must be the same at the project.<br/>".
@@ -179,6 +179,8 @@ class TaskController implements ControllerProviderInterface
                         $record,
                         array('PROJECT_NAME' => $_REQUEST['project'])
                     );
+
+                    $app->log($model->getLastSql());
                 }
 
                 $results->success = true;
@@ -194,8 +196,10 @@ class TaskController implements ControllerProviderInterface
 
             $results->message = htmlentities($results->message);
 
-            return $app->json(array(), 200);
-        })->bind('task-upload');
+            return new Response(json_encode($results , JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT));
+
+            //return $app->json(array(), 502);
+        })->bind('task-upl');
 
         ///
         /// GET: /task/export
@@ -254,30 +258,6 @@ class TaskController implements ControllerProviderInterface
                 $poFile->addTranslation( stripcslashes( $row['MSG_ID'] ), stripcslashes( $row['TRANSLATED_MSG_STR'] ) );
                 //$poFile->addTranslation( $row['MSG_ID'], $row['TRANSLATED_MSG_STR'] );
             }
-
-            // header('Content-Disposition: attachment; filename="' . basename($filename) . '"');
-            // header('Content-Type: application/octet-stream');
-
-            // $userAgent = strtolower($_SERVER['HTTP_USER_AGENT']);
-
-            // if (preg_match( "/msie/i", $userAgent)) {
-            //     //if ( ereg("msie", $userAgent)) {
-            //     header( 'Pragma: cache' );
-
-            //     if (file_exists($poFile)) {
-            //         $mtime = filemtime( $poFile);
-            //     } else {
-            //         $mtime = date( 'U' );
-            //     }
-            //     $gmt_mtime = gmdate( "D, d M Y H:i:s", $mtime ) . " GMT";
-            //     header( 'ETag: "' . md5( $mtime . $poFile ) . '"' );
-            //     header( "Last-Modified: " . $gmt_mtime );
-            //     header( 'Cache-Control: public' );
-            //     header( "Expires: " . gmdate( "D, d M Y H:i:s", time() + 60 * 10 ) . " GMT" ); //ten minutes
-            //     return;
-            // }
-            // readfile($filename);
-            //
 
             $stream = function () use ($filename) {
                 readfile($filename);

@@ -312,14 +312,11 @@ function main()
                                 waitTitle:'',
                                 waitMsg: 'Uploading...',
                                 success: function(o, resp) {
-                                    alert ('completed ' + Ext.getCmp('project').getValue());
-                                    var projectName = Ext.getCmp('project').getValue();
-                                    location.href = base_url + '?project=' + projectName;
+                                    location.href = base_url + 'translate?project=' + Ext.getCmp('project').getValue();
                                 },
                                 failure: function(o, resp){
-                                    alert('failure');
                                     newProjectWindow.hide();
-                                    Ext.MessageBox.show({title: '', msg: resp.result.msg, buttons:Ext.MessageBox.OK, animEl: 'mb9', fn: function(){}, icon:Ext.MessageBox.ERROR});
+                                    Ext.MessageBox.show({title: '', msg: resp.result.message, buttons:Ext.MessageBox.OK, animEl: 'mb9', fn: function(){}, icon:Ext.MessageBox.ERROR});
                                 }
                             });
                         }
@@ -387,10 +384,11 @@ function main()
 
                         if (uploader.getForm().isValid()) {
                             uploader.getForm().submit({
+                                //url: 'http://local/translator/main/upload?type='+uploadType+'&project='+defaultProject,
                                 url: 'task/upload?type='+uploadType+'&project='+defaultProject,
                                 waitTitle:'',
                                 waitMsg: 'Uploading...',
-                                success: function(o, resp){
+                                success: function(o, resp) {
                                     w.hide();
                                     grid.store.reload();
 

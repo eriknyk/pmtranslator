@@ -154,6 +154,8 @@ EOL;
 
     public function resolveLocale($countryParam, $languageParam)
     {
+        $currentTarget = $this->tableTarget;
+
         $this->setTarget('LANGUAGE');
         $result = $this->select('*', array('LAN_NAME' => $languageParam));
 
@@ -170,7 +172,7 @@ EOL;
 
         // compose locale
         if (empty($language)) {
-            throw new Exception("Error: Unknown or invalid languaje");
+            throw new \Exception("Error: Unknown or invalid languaje");
         }
 
         $locale = $language['LAN_ID'];
@@ -178,6 +180,8 @@ EOL;
         if (! empty($country)) {
             $locale .= '_'.$country['IC_UID'];
         }
+
+        $this->tableTarget = $currentTarget;
 
         return $locale;
     }
