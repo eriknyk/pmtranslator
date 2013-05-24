@@ -14,7 +14,7 @@ $app = new PmTranslator\Application($config, __DIR__);
 // Mount the controllers
 $app->mount('', new PmTranslator\Controller\MainController());
 $app->mount('', new PmTranslator\Controller\ProxyController());
-// $app->mount('', new GitList\Controller\CommitController());
+$app->mount('', new PmTranslator\Controller\TaskController());
 // $app->mount('', new GitList\Controller\TreeController());
 
 return $app;

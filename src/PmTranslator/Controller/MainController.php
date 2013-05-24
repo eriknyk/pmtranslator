@@ -7,6 +7,11 @@ use Silex\ControllerProviderInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 
+/**
+ * Main Controller
+ *
+ * @author Erik Amaru Ortiz <aortiz.erik@gmail.com>
+ */
 class MainController implements ControllerProviderInterface
 {
     public function connect(Application $app)
@@ -17,9 +22,6 @@ class MainController implements ControllerProviderInterface
         /// GET: /
         ///
         $route->get('/', function() use ($app) {
-
-            //$repositories = $app['git']->getRepositories($app['git.repos']);
-
             // return $app['twig']->render('index.twig', array(
             //     'name'   => 'erik',
             // ));

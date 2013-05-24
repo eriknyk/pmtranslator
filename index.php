@@ -3,6 +3,8 @@
 /**
  * PmTranslator 1.0
  * https://github.com/eriknyk/pmtranslator
+ *
+ * @author Erik Amaru Ortiz <aortiz.erik@gmail.com>
  */
 
 // Set the default timezone for systems without date.timezone set in php.ini

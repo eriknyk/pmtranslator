@@ -152,6 +152,36 @@ EOL;
         $this->dbh->exec("CREATE INDEX MSG_ID_index USING BTREE ON $projName (MSG_ID);");
     }
 
+    public function resolveLocale($countryParam, $languageParam)
+    {
+        $this->setTarget('LANGUAGE');
+        $result = $this->select('*', array('LAN_NAME' => $languageParam));
+
+        if (count($result) > 0) {
+            $language = $result[0];
+        }
+
+        $this->setTarget('COUNTRY');
+        $result = $this->select('*', array('IC_NAME' => $countryParam));
+
+        if (count($result) > 0) {
+            $country = $result[0];
+        }
+
+        // compose locale
+        if (empty($language)) {
+            throw new Exception("Error: Unknown or invalid languaje");
+        }
+
+        $locale = $language['LAN_ID'];
+
+        if (! empty($country)) {
+            $locale .= '_'.$country['IC_UID'];
+        }
+
+        return $locale;
+    }
+
     public function getLastSql()
     {
         return $this->lastSql;

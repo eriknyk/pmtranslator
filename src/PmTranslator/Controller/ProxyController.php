@@ -7,6 +7,11 @@ use Silex\ControllerProviderInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 
+/**
+ * Proxy Controller
+ *
+ * @author Erik Amaru Ortiz <aortiz.erik@gmail.com>
+ */
 class ProxyController implements ControllerProviderInterface
 {
     public function connect(Application $app)
@@ -159,7 +164,7 @@ class ProxyController implements ControllerProviderInterface
             }
 
             return $app->json($result, 201);
-        })->bind('getCountries');
+        })->bind('post-data');
 
 
         return $route;

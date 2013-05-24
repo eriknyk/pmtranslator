@@ -1,8 +1,8 @@
 <?php
 
-namespace GitList\Exception;
+namespace PmTranslator\Exception;
 
 class BlankDataException extends \RuntimeException
 {
-    
+
 }

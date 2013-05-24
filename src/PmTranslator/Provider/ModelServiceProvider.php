@@ -13,7 +13,7 @@ class ModelServiceProvider implements ServiceProviderInterface
      * Register the Model/Model on the Application ServiceProvider
      *
      * @param  Application $app Silex Application
-     * @return Git\Client  Instance of the Git\Client
+     * @return Model\Model  Instance of the Model\Model
      */
     public function register(Application $app)
     {

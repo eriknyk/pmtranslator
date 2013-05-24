@@ -308,7 +308,7 @@ function main()
 
                         if (uploader.getForm().isValid()) {
                             uploader.getForm().submit({
-                                url: 'main/upload?type=source&project='+defaultProject,
+                                url: 'task/upload?type=source&project='+defaultProject,
                                 waitTitle:'',
                                 waitMsg: 'Uploading...',
                                 success: function(o, resp){
@@ -385,7 +385,7 @@ function main()
 
                         if (uploader.getForm().isValid()) {
                             uploader.getForm().submit({
-                                url: 'main/upload?type='+uploadType+'&project='+defaultProject,
+                                url: 'task/upload?type='+uploadType+'&project='+defaultProject,
                                 waitTitle:'',
                                 waitMsg: 'Uploading...',
                                 success: function(o, resp){
@@ -822,7 +822,7 @@ function uploadFile(type, reload)
 
     if (uploader.getForm().isValid()) {
         uploader.getForm().submit({
-            url: 'main/upload?type=' + type+'&project='+defaultProject,
+            url: 'task/upload?type=' + type+'&project='+defaultProject,
             waitTitle:'',
             waitMsg: 'Uploading...',
             success: function(o, resp){

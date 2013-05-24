@@ -7,12 +7,11 @@ use Silex\Provider\TwigServiceProvider;
 use Silex\Provider\UrlGeneratorServiceProvider;
 
 use PmTranslator\Provider\ModelServiceProvider;
-// use GitList\Provider\RepositoryUtilServiceProvider;
-// use GitList\Provider\ViewUtilServiceProvider;
-// use GitList\Provider\RoutingUtilServiceProvider;
+use PmTranslator\Provider\PoHandlerServiceProvider;
+
 
 /**
- * GitList application.
+ * PmTranslator application.
  */
 class Application extends \Silex\Application
 {
@@ -58,9 +57,7 @@ class Application extends \Silex\Application
         // ));
 
         $this->register(new ModelServiceProvider());
-        //$this->register(new RepositoryUtilServiceProvider());
         $this->register(new UrlGeneratorServiceProvider());
-        //$this->register(new RoutingUtilServiceProvider());
 
         $this['twig'] = $this->share($this->extend('twig', function ($twig, $app) {
             $twig->addFilter('htmlentities', new \Twig_Filter_Function('htmlentities'));
