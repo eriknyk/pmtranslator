@@ -311,11 +311,13 @@ function main()
                                 url: 'task/upload?type=source&project='+defaultProject,
                                 waitTitle:'',
                                 waitMsg: 'Uploading...',
-                                success: function(o, resp){
+                                success: function(o, resp) {
+                                    alert ('completed ' + Ext.getCmp('project').getValue());
                                     var projectName = Ext.getCmp('project').getValue();
                                     location.href = base_url + '?project=' + projectName;
                                 },
                                 failure: function(o, resp){
+                                    alert('failure');
                                     newProjectWindow.hide();
                                     Ext.MessageBox.show({title: '', msg: resp.result.msg, buttons:Ext.MessageBox.OK, animEl: 'mb9', fn: function(){}, icon:Ext.MessageBox.ERROR});
                                 }
@@ -420,59 +422,6 @@ function main()
         ]
     });
 
-    var exportWindow = new Ext.Window({
-        id: 'exportWindow',
-        title: '',
-        width: 420,
-        height: 170,
-        modal: true,
-        autoScroll: false,
-        maximizable: false,
-        resizable: false,
-        closeAction : 'hide',
-        items: [
-          new Ext.FormPanel({
-            id:'formPanel1',
-            fileUpload: true,
-            width: 400,
-            frame: true,
-            title: 'Export Translation File',
-            autoHeight: false,
-            bodyStyle: 'padding: 10px 10px 0 10px;',
-            labelWidth: 80,
-            labelAlign: 'right',
-            defaults: {
-                anchor: '90%',
-                allowBlank: false,
-                msgTarget: 'side'
-            }/*,
-            items: [
-                comboCountry,
-                comboLanguage
-            ]*/,
-            buttons: [{
-                    text: 'Export',
-                    handler: function() {
-                        var formPanel = Ext.getCmp('formPanel1');
-
-                        if (formPanel.getForm().isValid()) {
-
-                            var url = 'main/export?project='+defaultProject+'&country='+Ext.getCmp('Country').getValue()+'&language='+Ext.getCmp('Language').getValue();
-
-                            location.href = url;
-                        }
-                    }
-                }, {
-                    text: 'Cancel',
-                    handler: function(){
-                        exportWindow.hide();
-                    }
-                }
-            ]
-          })
-        ]
-    });
-
     var untranslatedFilter = new Ext.Button({
         id: 'untranslatedFilter',
         text: 'Untranslated',
@@ -481,10 +430,6 @@ function main()
         toggleHandler: onItemToggle,
         allowDepress: false,
         pressed: false
-        // handler: function () {
-        //     //Ext.getCmp('untranslatedFilter').setValue('1');
-        //     store.load({params:{untranslatedFilter: '1', start: 0 , limit: Ext.getCmp('pageSize').getValue(), project: defaultProject}});
-        // }
     });
 
     var allFilter = new Ext.Action({
@@ -494,11 +439,8 @@ function main()
         enableToggle: true,
         toggleHandler: onItemToggle,
         allowDepress: false,
-        pressed: true
-        // handler: function () {
-        //     //Ext.getCmp('untranslatedFilter').setValue('');
-        //     store.load({params:{untranslatedFilter: '', start: 0 , limit: Ext.getCmp('pageSize').getValue(), project: defaultProject}});
-        // }
+        pressed: true,
+        handler: function (){}
     });
 
     function onItemToggle(item, pressed)
@@ -545,7 +487,7 @@ function main()
         icon: 'web/img/upload.png',
         handler: function(){
             //exportWindow.show();
-            var url = 'main/export?project='+defaultProject+'&country='+Ext.getCmp('Country').getValue()+'&language='+Ext.getCmp('Language').getValue();
+            var url = 'task/export?project='+defaultProject+'&country='+Ext.getCmp('Country').getValue()+'&language='+Ext.getCmp('Language').getValue();
             location.href = url;
         }
     });

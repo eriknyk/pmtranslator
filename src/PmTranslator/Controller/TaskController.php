@@ -24,6 +24,7 @@ class TaskController implements ControllerProviderInterface
         /// POST: /task/upload
         ///
         $route->post('/task/upload', function() use ($app) {
+            return $app->json(array(), 501);
 
             set_time_limit(0);
 
@@ -147,15 +148,15 @@ class TaskController implements ControllerProviderInterface
                                 $res = $model->update(array('TRANSLATED_MSG_STR'=> $rowTranslation['msgstr']), $record);
 
                                 if ($res == 0) {
-                                    $this->log('UPDATE FAILED!');
-                                    $this->log($model->getLastSql());
+                                    //$this->log('UPDATE FAILED!');
+                                    //$this->log($model->getLastSql());
                                 }
                             } else {
-                                $this->log('SKIPPED: ' . $matchRecord['MSG_ID'] .'=='. $matchRecord['TRANSLATED_MSG_STR'] ."  ---> ". $model->getLastSql());
+                                //$this->log('SKIPPED: ' . $matchRecord['MSG_ID'] .'=='. $matchRecord['TRANSLATED_MSG_STR'] ."  ---> ". $model->getLastSql());
                             }
                         } else {
-                            $this->log('NOT FOUND:');
-                            $this->log($model->getLastSql());
+                            //$this->log('NOT FOUND:');
+                            //$this->log($model->getLastSql());
                         }
                     }
                 }
@@ -193,9 +194,101 @@ class TaskController implements ControllerProviderInterface
 
             $results->message = htmlentities($results->message);
 
-            return $app->json($results, 201);
+            return $app->json(array(), 200);
         })->bind('task-upload');
 
+        ///
+        /// GET: /task/export
+        ///
+        $route->get('/task/export', function() use ($app) {
+
+            //require_once 'lib/class.i18n_po.php';
+
+            set_time_limit(0);
+
+            $projectName = $_REQUEST['project'];
+            $language = $_REQUEST['country'];
+            $country = $_REQUEST['language'];
+            $version = '2.0';
+            $tmpDir = $app->getPath() . 'cache/';
+
+            $model = $app['model'];
+
+            $model->setTarget('PROJECT');
+            $result = $model->select('*', array('PROJECT_NAME' => $projectName));
+
+            if (empty($result)) {
+                throw new Exception("ERROR: Project '$projectName' does not exist!");
+            }
+
+            $project = $result[0];
+            $locale = $project['TARGET_LOCALE'];
+
+            $model->setTarget($projectName);
+            $rows = $model->select();
+
+            $filename = $tmpDir . $projectName.'.'.$locale . '.po';
+
+            $poFile = new PoHandler($filename);
+            $poFile->buildInit();
+
+            //setting headers
+            $poFile->addHeader('Project-Id-Version', ucfirst(strtolower($projectName)) .' - '.$version);
+            $poFile->addHeader('POT-Creation-Date', '');
+            $poFile->addHeader('PO-Revision-Date', date('Y-m-d H:i:s'));
+            $poFile->addHeader('Last-Translator', '');
+            $poFile->addHeader('Language-Team', '');
+            $poFile->addHeader('MIME-Version', '1.0');
+            $poFile->addHeader('Content-Type', 'text/plain; charset=utf-8');
+            $poFile->addHeader('Content-Transfer_Encoding', '8bit');
+            $poFile->addHeader('X-Poedit-Language', $language);
+            $poFile->addHeader('X-Poedit-Country', $country );
+            $poFile->addHeader('X-Poedit-SourceCharset', 'utf-8');
+            $poFile->addHeader('Content-Transfer-Encoding', '8bit');
+
+            foreach ($rows as $row) {
+                $poFile->addTranslatorComment( $row['REF_1'] );
+                $poFile->addTranslatorComment( $row['REF_2'] );
+                $poFile->addReference( $row['REF_LOC'] );
+
+                $poFile->addTranslation( stripcslashes( $row['MSG_ID'] ), stripcslashes( $row['TRANSLATED_MSG_STR'] ) );
+                //$poFile->addTranslation( $row['MSG_ID'], $row['TRANSLATED_MSG_STR'] );
+            }
+
+            // header('Content-Disposition: attachment; filename="' . basename($filename) . '"');
+            // header('Content-Type: application/octet-stream');
+
+            // $userAgent = strtolower($_SERVER['HTTP_USER_AGENT']);
+
+            // if (preg_match( "/msie/i", $userAgent)) {
+            //     //if ( ereg("msie", $userAgent)) {
+            //     header( 'Pragma: cache' );
+
+            //     if (file_exists($poFile)) {
+            //         $mtime = filemtime( $poFile);
+            //     } else {
+            //         $mtime = date( 'U' );
+            //     }
+            //     $gmt_mtime = gmdate( "D, d M Y H:i:s", $mtime ) . " GMT";
+            //     header( 'ETag: "' . md5( $mtime . $poFile ) . '"' );
+            //     header( "Last-Modified: " . $gmt_mtime );
+            //     header( 'Cache-Control: public' );
+            //     header( "Expires: " . gmdate( "D, d M Y H:i:s", time() + 60 * 10 ) . " GMT" ); //ten minutes
+            //     return;
+            // }
+            // readfile($filename);
+            //
+
+            $stream = function () use ($filename) {
+                readfile($filename);
+            };
+
+            return $app->stream($stream, 200, array(
+                'Content-Type' => 'octet-stream',
+                'Content-length' => filesize($filename),
+                'Content-Disposition' => 'attachment; filename="'.basename($filename).'"'
+            ));
+        })->bind('task-export');
 
         return $route;
     }
